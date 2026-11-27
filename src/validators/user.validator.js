@@ -41,8 +41,20 @@ export function validateUserIdParam(req) {
   return errors;
 }
 
+export function validateRoleUpdate(req) {
+  const { role } = req.body || {};
+  const errors = [];
+
+  if (!role || !['USER', 'ADMIN'].includes(role)) {
+    errors.push('Role must be either "USER" or "ADMIN"');
+  }
+
+  return errors;
+}
+
 export default {
   validateUpdateProfile,
   validateStatusUpdate,
+  validateRoleUpdate,
   validateUserIdParam,
 };

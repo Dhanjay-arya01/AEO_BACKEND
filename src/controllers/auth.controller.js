@@ -3,8 +3,8 @@ import { sendSuccess } from '../utils/response.util.js';
 
 export async function signup(req, res, next) {
   try {
-    const { name, email, password, company, role } = req.body;
-    const result = await authService.signup({ name, email, password, company, role });
+    const { name, email, password, company } = req.body;
+    const result = await authService.signup({ name, email, password, company });
     return sendSuccess(res, result, 'User registered successfully', 201);
   } catch (error) {
     next(error);

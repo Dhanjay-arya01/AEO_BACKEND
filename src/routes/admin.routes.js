@@ -3,7 +3,7 @@ import adminController from '../controllers/admin.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { requireAdmin } from '../middleware/role.middleware.js';
 import { validate } from '../middleware/validate.middleware.js';
-import { validateUserIdParam, validateStatusUpdate } from '../validators/user.validator.js';
+import { validateUserIdParam, validateStatusUpdate, validateRoleUpdate } from '../validators/user.validator.js';
 import { validateAuditIdParam } from '../validators/audit.validator.js';
 
 const router = Router();
@@ -20,6 +20,12 @@ router.patch(
   validate(validateUserIdParam),
   validate(validateStatusUpdate),
   adminController.updateUserStatus
+);
+router.patch(
+  '/users/:id/role',
+  validate(validateUserIdParam),
+  validate(validateRoleUpdate),
+  adminController.updateUserRole
 );
 router.get('/projects', adminController.listProjects);
 router.get('/audits', adminController.listAudits);

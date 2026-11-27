@@ -124,6 +124,24 @@ export class AdminService {
     return updatedUser.toJSON();
   }
 
+  async updateUserRole(targetUserId, role, adminUserId) {
+    if (String(targetUserId) === String(adminUserId) && role !== 'ADMIN') {
+      throw ApiError.badRequest('Administrators cannot revoke their own admin privileges.');
+    }
+
+    if (!['USER', 'ADMIN'].includes(role)) {
+      throw ApiError.badRequest('Role must be either USER or ADMIN.');
+    }
+
+    const user = await userRepository.findById(targetUserId);
+    if (!user) {
+      throw ApiError.notFound('User not found.');
+    }
+
+    const updatedUser = await userRepository.updateById(targetUserId, { role });
+    return updatedUser.toJSON();
+  }
+
   async listAllProjects(query) {
     const { page, limit, skip } = getPaginationParams(query);
     const filter = {};

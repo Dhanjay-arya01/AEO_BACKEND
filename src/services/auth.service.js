@@ -17,7 +17,7 @@ export class AuthService {
     );
   }
 
-  async signup({ name, email, password, company, role = 'USER' }) {
+  async signup({ name, email, password, company }) {
     const normalizedEmail = email.toLowerCase().trim();
 
     const existingUser = await userRepository.findByEmail(normalizedEmail);
@@ -29,15 +29,13 @@ export class AuthService {
     const salt = await bcrypt.genSalt(12);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Prevent regular signup from creating admin directly unless specified safely
-    const assignedRole = role === 'ADMIN' ? 'ADMIN' : 'USER';
-
+    // Every new registration is strictly assigned USER role by default
     const user = await userRepository.create({
       name: name.trim(),
       email: normalizedEmail,
       passwordHash,
       company: company ? company.trim() : '',
-      role: assignedRole,
+      role: 'USER',
       isActive: true,
       lastLoginAt: new Date(),
     });

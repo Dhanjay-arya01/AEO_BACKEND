@@ -1,12 +1,13 @@
 import projectRepository from '../repositories/project.repository.js';
 import auditRepository from '../repositories/audit.repository.js';
+import auditService from './audit.service.js';
 import { validateUrlForSsrf } from '../utils/ssrf.util.js';
 import { ApiError } from '../utils/apiError.util.js';
 import { getPaginationParams, buildPaginationMeta } from '../utils/pagination.util.js';
 
 export class ProjectService {
   async createProject(ownerId, data) {
-    const { name, websiteUrl, websiteType, targetAudience, targetLocation, keywords, competitors } = data;
+    const { name, websiteUrl, websiteType, targetAudience, targetLocation, keywords, competitors, jobType } = data;
 
     // SSRF validation and domain extraction
     const { normalizedUrl, domain } = await validateUrlForSsrf(websiteUrl);
@@ -24,7 +25,23 @@ export class ProjectService {
       isActive: true,
     });
 
-    return project.toJSON();
+    const projectData = project.toJSON();
+
+    // Automatically enqueue initial audit job for the new project
+    try {
+      const initialAudit = await auditService.createAudit(project.id, ownerId, 'USER', {
+        jobType: jobType || 'FULL_AUDIT',
+      });
+      projectData.initialAudit = initialAudit;
+    } catch (auditErr) {
+      console.warn(`Project ${project.id} created, but initial audit could not be queued:`, auditErr.message);
+      projectData.initialAudit = {
+        status: 'FAILED',
+        error: auditErr.message,
+      };
+    }
+
+    return projectData;
   }
 
   async listUserProjects(userId, userRole, query) {

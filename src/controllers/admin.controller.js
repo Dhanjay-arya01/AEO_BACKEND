@@ -43,6 +43,17 @@ export async function updateUserStatus(req, res, next) {
   }
 }
 
+export async function updateUserRole(req, res, next) {
+  try {
+    const adminId = req.user.id || req.user._id;
+    const { role } = req.body;
+    const updated = await adminService.updateUserRole(req.params.id, role, adminId);
+    return sendSuccess(res, updated, `User role updated to ${role} successfully`);
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function listProjects(req, res, next) {
   try {
     const { projects, meta } = await adminService.listAllProjects(req.query);
@@ -84,6 +95,7 @@ export default {
   listUsers,
   getUserDetails,
   updateUserStatus,
+  updateUserRole,
   listProjects,
   listAudits,
   getAuditFailure,
